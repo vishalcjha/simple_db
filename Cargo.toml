@@ -14,3 +14,6 @@ thiserror = "1.0.57"
 frontend = {path = "./frontend"}
 backend = {path = "./backend"}
 anyhow = "1.0.79"
+rstest = "0.18.2"
+rustyline = {version = "13.0.0", features = ["with-file-history"]}
+lazy_static = "1.4.0"

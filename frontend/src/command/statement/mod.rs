@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use nom::{branch::alt, bytes::complete::tag_no_case, IResult};
 
-use crate::errors::DbError;
+use crate::{definitions::table_definition::TableDefination, errors::DbError};
 
 use self::{insert::InsertStatement, select::SelectStatement};
 
@@ -13,16 +13,19 @@ pub mod select;
 pub enum StatementCommand {
     Select(SelectStatement),
     Insert(InsertStatement),
+    Create(TableDefination),
 }
 
 impl FromStr for StatementCommand {
     type Err = DbError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        use CommandType::*;
         let command_type = CommandType::from_str(s)?;
         match command_type {
-            CommandType::Select => Ok(StatementCommand::Select(SelectStatement::from_str(s)?)),
-            CommandType::Insert => Ok(StatementCommand::Insert(InsertStatement::from_str(s)?)),
+            Select => Ok(StatementCommand::Select(SelectStatement::from_str(s)?)),
+            Insert => Ok(StatementCommand::Insert(InsertStatement::from_str(s)?)),
+            Create => Ok(StatementCommand::Create(TableDefination::from_str(s)?)),
         }
     }
 }
@@ -30,6 +33,7 @@ impl FromStr for StatementCommand {
 enum CommandType {
     Select,
     Insert,
+    Create,
 }
 
 fn parse_select_command(command: &str) -> IResult<&str, CommandType> {
@@ -42,8 +46,18 @@ fn parse_insert_command(command: &str) -> IResult<&str, CommandType> {
     Ok(("", CommandType::Insert))
 }
 
+fn parse_create_command(command: &str) -> IResult<&str, CommandType> {
+    let _ = tag_no_case("create")(command)?;
+    Ok(("", CommandType::Create))
+}
+
 fn parse_command_type(command: &str) -> IResult<&str, CommandType> {
-    let command = alt((parse_select_command, parse_insert_command))(command.trim())?.1;
+    let command = alt((
+        parse_select_command,
+        parse_insert_command,
+        parse_create_command,
+    ))(command.trim())?
+    .1;
     Ok(("", command))
 }
 

@@ -1,22 +1,30 @@
+use frontend::command::statement::StatementCommand;
 pub trait Execution {
     fn execute(&self);
 }
 
-pub fn execute(command: frontend::command::statement::StatementCommand) {
+pub fn execute(command: StatementCommand) {
     match command {
-        frontend::command::statement::StatementCommand::Select(statement) => statement.execute(),
-        frontend::command::statement::StatementCommand::Insert(statement) => statement.execute(),
+        StatementCommand::Select(statement) => statement.execute(),
+        StatementCommand::Insert(statement) => statement.execute(),
+        StatementCommand::Create(statement) => statement.execute(),
     }
 }
 
-impl Execution for frontend::insert::InsertStatement {
+impl Execution for frontend::InsertStatement {
     fn execute(&self) {
         println!("Will execute insert -> {self:?}");
     }
 }
 
-impl Execution for frontend::select::SelectStatement {
+impl Execution for frontend::SelectStatement {
     fn execute(&self) {
         println!("Will execute select -> {self:?}");
+    }
+}
+
+impl Execution for frontend::TableDefination {
+    fn execute(&self) {
+        println!("Will execute create -> {self:?}");
     }
 }
