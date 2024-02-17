@@ -19,7 +19,11 @@ fn main() -> SError<()> {
             Command::Meta(meta_command) => match meta_command {
                 _ => std::process::exit(0),
             },
-            Command::Statement(statement) => backend::vm::execute(statement),
+            Command::Statement(statement) => {
+                if let Err(err) = backend::vm::execute(statement) {
+                    println!("Failed with {err:?}");
+                }
+            }
         }
     }
 }

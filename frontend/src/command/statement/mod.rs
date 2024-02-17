@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use nom::{branch::alt, bytes::complete::tag_no_case, IResult};
 
-use crate::{definitions::table_definition::TableDefination, errors::DbError};
+use crate::{definitions::table_definition::TableDefinition, errors::DbError};
 
 use self::{insert::InsertStatement, select::SelectStatement};
 
@@ -13,7 +13,7 @@ pub mod select;
 pub enum StatementCommand {
     Select(SelectStatement),
     Insert(InsertStatement),
-    Create(TableDefination),
+    Create(TableDefinition),
 }
 
 impl FromStr for StatementCommand {
@@ -25,7 +25,7 @@ impl FromStr for StatementCommand {
         match command_type {
             Select => Ok(StatementCommand::Select(SelectStatement::from_str(s)?)),
             Insert => Ok(StatementCommand::Insert(InsertStatement::from_str(s)?)),
-            Create => Ok(StatementCommand::Create(TableDefination::from_str(s)?)),
+            Create => Ok(StatementCommand::Create(TableDefinition::from_str(s)?)),
         }
     }
 }

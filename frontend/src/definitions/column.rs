@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use nom::{
     branch::alt,
@@ -11,8 +11,8 @@ use crate::errors::DbError;
 
 use super::NomParsable;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Column(String, ColumnType);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Column(pub String, pub ColumnType);
 
 impl NomParsable for Column {
     fn nom_parse(input: &str) -> nom::IResult<&str, Self> {
@@ -34,6 +34,15 @@ impl Column {
 pub enum ColumnType {
     Int,
     Text,
+}
+
+impl Display for ColumnType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ColumnType::Int => write!(f, "{}", "int"),
+            ColumnType::Text => write!(f, "{}", "text"),
+        }
+    }
 }
 
 impl FromStr for ColumnType {
