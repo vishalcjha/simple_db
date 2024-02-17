@@ -4,6 +4,8 @@ pub type SError<T> = Result<T, DbError>;
 pub enum DbError {
     #[error("Unrecognized command {0}")]
     UnrecognizedCommand(String),
+    #[error("Unrecognized statement command {0:?}")]
+    StatementError(#[from] anyhow::Error),
     #[error("Failed to do io operation")]
     IoError(#[from] std::io::Error),
 }
