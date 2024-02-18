@@ -6,4 +6,10 @@ pub(crate) type BEResult<T> = Result<T, BEErrors>;
 pub enum BEErrors {
     #[error("table {0:?} already present in database")]
     DuplicateDefinition(TableName),
+    #[error("Insert to table failed")]
+    InsertFailed,
+    #[error("Column {0} not present in table")]
+    MissingColumn(String),
+    #[error("{2} for Column {0} can not be conveted to {1}")]
+    MismatchedDataType(String, &'static str, String),
 }

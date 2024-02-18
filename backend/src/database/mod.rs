@@ -1,3 +1,5 @@
+mod page;
+mod table;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -7,11 +9,14 @@ use frontend::{definitions::table_definition::TableName, TableDefinition};
 
 use crate::errors::{BEErrors, BEResult};
 
+use self::table::Table;
+
 type Sharable<T> = Arc<Mutex<T>>;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Database {
     table_definitions: Sharable<HashMap<TableName, TableDefinition>>,
+    tables: Sharable<HashMap<TableName, Table>>,
 }
 
 impl Database {

@@ -48,6 +48,8 @@ impl Execution for frontend::SelectStatement {
 impl Execution for frontend::TableDefinition {
     type Output = ();
     fn execute(self) -> BEResult<()> {
+        println!("Table def");
+        println!("{self}");
         DATABASE.add_table_definitions(self)?;
         Ok(())
     }

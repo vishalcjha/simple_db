@@ -3,6 +3,7 @@ use lazy_static::lazy_static;
 
 mod database;
 mod errors;
+mod fixtures;
 pub mod vm;
 
 lazy_static! {

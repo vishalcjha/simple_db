@@ -1,4 +1,4 @@
-mod column;
+pub mod column;
 pub mod table_definition;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
