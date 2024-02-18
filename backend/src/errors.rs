@@ -14,4 +14,6 @@ pub enum BEErrors {
     MismatchedDataType(String, &'static str, String),
     #[error("Missing table {0}")]
     MissingTable(String),
+    #[error("Error in implementation {0}")]
+    InternalError(String),
 }

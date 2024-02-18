@@ -15,7 +15,7 @@ use crate::errors::{BEErrors, BEResult};
 use self::{page::Page, table::Table};
 
 type Sharable<T> = Arc<Mutex<T>>;
-pub type Row = Vec<Vec<Value>>;
+pub type Rows = Vec<Vec<Value>>;
 
 #[derive(Debug, Clone, Default)]
 pub(super) struct Database {
@@ -45,14 +45,10 @@ impl Database {
 
         let mut tables = self.tables.lock().unwrap();
         let table = tables.get_mut(&insert_statement.0).unwrap();
-        let mut page = Page::default();
-        page.write(insert_statement.1, table_definition)?;
-
-        table.pages.push(page);
-        Ok(())
+        table.write_row(insert_statement.1, table_definition)
     }
 
-    pub(super) fn select_records(&self, select_statement: SelectStatement) -> BEResult<Row> {
+    pub(super) fn select_records(&self, select_statement: SelectStatement) -> BEResult<Rows> {
         let table_definition = self.get_table_definition(&select_statement.0)?;
         let tables = self.tables.lock().unwrap();
         let table = tables.get(&select_statement.0).unwrap();

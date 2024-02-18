@@ -1,10 +1,12 @@
 use std::{
+    fs::read_to_string,
     io::{self, Write},
     str::FromStr,
 };
 
 use frontend::{command::Command, errors::SError, prompt::accept_prompt};
 fn main() -> SError<()> {
+    load_sample_data();
     loop {
         print!("db > ");
         io::stdout().flush()?;
@@ -25,5 +27,23 @@ fn main() -> SError<()> {
                 }
             }
         }
+    }
+}
+
+fn load_sample_data() {
+    for command in read_to_string("scripts/initial_load_student_table.sql")
+        .unwrap()
+        .lines()
+    {
+        let Ok(command) = Command::from_str(command) else {
+            panic!("Failed to read pre load command");
+        };
+
+        match command {
+            Command::Meta(_) => panic!("only statment command are allowed in pre-load"),
+            Command::Statement(statement) => {
+                backend::vm::execute(statement).expect("Failed to execute statement")
+            }
+        };
     }
 }
