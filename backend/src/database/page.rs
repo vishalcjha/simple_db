@@ -36,6 +36,16 @@ impl Drop for Page {
 }
 
 impl Page {
+    fn get_alignment_padding<T>(offset: usize) -> usize {
+        let required_alignment = std::mem::align_of::<T>();
+        let misalignment = offset % required_alignment;
+        if misalignment > 0 {
+            required_alignment - misalignment
+        } else {
+            0
+        }
+    }
+
     pub fn write(
         &mut self,
         values: Vec<Value>,
@@ -59,6 +69,8 @@ impl Page {
                             };
 
                             unsafe {
+                                self.free_offset +=
+                                    Page::get_alignment_padding::<i64>(self.free_offset);
                                 let ptr = self.page.add(self.free_offset);
                                 std::ptr::copy_nonoverlapping(
                                     &value as *const i64 as *const u8,
@@ -108,6 +120,7 @@ impl Page {
 
             match column.1 {
                 frontend::ColumnType::Int => unsafe {
+                    offset += Page::get_alignment_padding::<i64>(offset);
                     let ptr = self.page.add(offset);
                     let value = *(ptr as *const i64);
                     result.push(Value::NamedValue(name, value.to_string()));
