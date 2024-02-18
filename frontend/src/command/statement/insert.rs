@@ -30,6 +30,13 @@ impl Value {
     fn new_unnamed_value(value: impl Into<String>) -> Value {
         Value::UnnamedValue(value.into())
     }
+
+    pub fn value(self) -> String {
+        match self {
+            Value::NamedValue(_, value) => value,
+            Value::UnnamedValue(value) => value,
+        }
+    }
 }
 
 // simple parser to parse "(a, b, c) and return vec!["a", "b", "c"]
@@ -73,7 +80,7 @@ fn parse_value_list(input: &str) -> nom::IResult<&str, Vec<Value>> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct InsertStatement(TableName, Vec<Value>);
+pub struct InsertStatement(pub TableName, pub Vec<Value>);
 
 impl NomParsable for InsertStatement {
     fn nom_parse(input: &str) -> nom::IResult<&str, Self> {

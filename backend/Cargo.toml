@@ -14,3 +14,4 @@ thiserror = "1.0.57"
 frontend = {path = "../frontend"}
 lazy_static = "1.4.0"
 rstest = "0.18.2"
+prettytable-rs = "0.10.0"

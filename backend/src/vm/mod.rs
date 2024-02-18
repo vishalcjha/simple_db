@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use frontend::command::statement::StatementCommand;
+use prettytable::{Cell, Row};
 
 use crate::{errors::BEResult, DATABASE};
 pub trait Execution {
@@ -32,15 +33,26 @@ pub fn execute(command: StatementCommand) -> BEResult<ExecutionResult> {
 impl Execution for frontend::InsertStatement {
     type Output = ();
     fn execute(self) -> BEResult<()> {
-        println!("Will execute insert -> {self:?}");
-        Ok(())
+        DATABASE.insert_record(self)
     }
 }
 
 impl Execution for frontend::SelectStatement {
     type Output = ();
     fn execute(self) -> BEResult<()> {
-        println!("Will execute select -> {self:?}");
+        use prettytable::Table;
+        let mut table = Table::new();
+        table.add_row(Row::new(
+            self.1.iter().map(|it| Cell::new(&it.0)).collect::<Vec<_>>(),
+        ));
+        let rows = DATABASE.select_records(self)?;
+        for row in rows {
+            table.add_row(Row::new(
+                row.into_iter().map(|it| Cell::new(&it.value())).collect(),
+            ));
+        }
+
+        table.printstd();
         Ok(())
     }
 }

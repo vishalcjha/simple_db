@@ -1,4 +1,7 @@
-use std::mem::size_of;
+use std::{
+    alloc::{alloc, dealloc, Layout},
+    mem::size_of,
+};
 
 use frontend::{command::statement::insert::Value, ColumnName, TableDefinition};
 
@@ -7,15 +10,27 @@ const PAGE_SIZE: usize = 4096;
 const BYTE_COUNT: usize = PAGE_SIZE / size_of::<u8>();
 #[derive(Debug, Clone)]
 pub(super) struct Page {
-    page: [u8; BYTE_COUNT],
+    page: *mut u8,
     free_offset: usize,
 }
 
+unsafe impl Send for Page {}
+unsafe impl Sync for Page {}
+
 impl Default for Page {
     fn default() -> Self {
+        let page = unsafe { alloc(Layout::from_size_align_unchecked(PAGE_SIZE, 1)) as *mut u8 };
         Self {
-            page: [0; BYTE_COUNT],
+            page,
             free_offset: Default::default(),
+        }
+    }
+}
+
+impl Drop for Page {
+    fn drop(&mut self) {
+        unsafe {
+            dealloc(self.page, Layout::from_size_align_unchecked(PAGE_SIZE, 1));
         }
     }
 }
@@ -44,7 +59,7 @@ impl Page {
                             };
 
                             unsafe {
-                                let ptr = self.page.as_mut_ptr().add(self.free_offset);
+                                let ptr = self.page.add(self.free_offset);
                                 std::ptr::copy_nonoverlapping(
                                     &value as *const i64 as *const u8,
                                     ptr,
@@ -54,8 +69,8 @@ impl Page {
                             self.free_offset += std::mem::size_of::<i64>();
                         }
                         frontend::ColumnType::Text => unsafe {
-                            //write the lenght of string
-                            let ptr = self.page.as_mut_ptr().add(self.free_offset);
+                            //write the length of string
+                            let ptr = self.page.add(self.free_offset);
                             let str_len = value.len();
                             std::ptr::copy_nonoverlapping(
                                 &str_len as *const usize as *const u8,
@@ -65,7 +80,7 @@ impl Page {
                             self.free_offset += std::mem::size_of::<usize>();
 
                             //write actual string
-                            let ptr = self.page.as_mut_ptr().add(self.free_offset);
+                            let ptr = self.page.add(self.free_offset);
                             std::ptr::copy_nonoverlapping(value.as_ptr(), ptr, value.len());
                             self.free_offset += value.len();
                         },
@@ -93,17 +108,17 @@ impl Page {
 
             match column.1 {
                 frontend::ColumnType::Int => unsafe {
-                    let ptr = self.page.as_ptr().add(offset);
+                    let ptr = self.page.add(offset);
                     let value = *(ptr as *const i64);
                     result.push(Value::NamedValue(name, value.to_string()));
                     offset += std::mem::size_of::<i64>();
                 },
                 frontend::ColumnType::Text => unsafe {
-                    let ptr = self.page.as_ptr().add(offset);
+                    let ptr = self.page.add(offset);
                     let str_len = *(ptr as *const usize);
                     offset += std::mem::size_of::<usize>();
 
-                    let ptr = self.page.as_ptr().add(offset);
+                    let ptr = self.page.add(offset);
                     let byte_slice = std::slice::from_raw_parts(ptr, str_len);
                     let string_value = std::str::from_utf8_unchecked(byte_slice);
                     offset += str_len;

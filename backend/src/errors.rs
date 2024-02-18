@@ -12,4 +12,6 @@ pub enum BEErrors {
     MissingColumn(String),
     #[error("{2} for Column {0} can not be conveted to {1}")]
     MismatchedDataType(String, &'static str, String),
+    #[error("Missing table {0}")]
+    MissingTable(String),
 }

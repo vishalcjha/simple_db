@@ -80,6 +80,7 @@ dependencies = [
  "frontend",
  "lazy_static",
  "nom",
+ "prettytable-rs",
  "rstest",
  "serde",
  "thiserror",
