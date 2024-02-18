@@ -1,4 +1,3 @@
-use rustyline::error::ReadlineError;
 use thiserror::Error;
 pub type SError<T> = Result<T, DbError>;
 #[derive(Debug, Error)]
@@ -12,6 +11,4 @@ pub enum DbError {
     UnrecognizedColumnType(String),
     #[error("Failed to do io operation")]
     IoError(#[from] std::io::Error),
-    #[error("Failed to read prompt {0}")]
-    ReadLineError(#[from] ReadlineError),
 }

@@ -13,6 +13,5 @@ lazy_static = "1.4.0"
 nom = "7.1.3"
 prettytable-rs = "0.10.0"
 rstest = {version = "0.18.2"}
-rustyline = {version = "13.0.0", features = ["with-file-history"]}
 serde = "1.0.196"
 thiserror = "1.0.57"

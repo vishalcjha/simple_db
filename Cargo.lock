@@ -247,7 +247,6 @@ dependencies = [
  "nom",
  "prettytable-rs",
  "rstest",
- "rustyline",
  "serde",
  "thiserror",
 ]

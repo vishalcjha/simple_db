@@ -12,7 +12,7 @@ use frontend::{
 
 use crate::errors::{BEErrors, BEResult};
 
-use self::{page::Page, table::Table};
+use self::table::Table;
 
 type Sharable<T> = Arc<Mutex<T>>;
 pub type Rows = Vec<Vec<Value>>;
