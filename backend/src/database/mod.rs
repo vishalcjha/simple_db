@@ -20,6 +20,7 @@ use self::table::Table;
 
 type Sharable<T> = Arc<Mutex<T>>;
 pub type Rows = Vec<Vec<Value>>;
+pub(super) const PAGE_SIZE: usize = 4096;
 
 #[derive(Debug, Clone, Default)]
 pub(super) struct Database {
@@ -32,6 +33,36 @@ impl Database {
     pub(super) fn init_db_with_file(&self, base_path: PathBuf) -> BEResult<()> {
         let mut disk_accessor = self.disk_accessor.lock().unwrap();
         *disk_accessor = Some(DiskAccessor::new(base_path));
+        Ok(())
+    }
+
+    pub(super) fn flush_db(&self) -> BEResult<()> {
+        {
+            let tables = self.table_definitions.lock().unwrap();
+            let disk_accessor = self.disk_accessor.lock().unwrap();
+            for (name, def) in tables.iter() {
+                disk_accessor
+                    .as_ref()
+                    .unwrap()
+                    .write_table_definition(name, def)?;
+            }
+        }
+
+        {
+            let tables = self.tables.lock().unwrap();
+            let disk_accessor = self.disk_accessor.lock().unwrap();
+
+            for (name, data) in tables.iter() {
+                for (index, page) in data.pages.iter().enumerate() {
+                    disk_accessor.as_ref().unwrap().write_data_page(
+                        name,
+                        index,
+                        page.get_data(),
+                    )?;
+                }
+            }
+        }
+
         Ok(())
     }
 

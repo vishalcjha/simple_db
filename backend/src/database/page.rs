@@ -4,8 +4,8 @@ use frontend::{command::statement::insert::Value, ColumnName, TableDefinition};
 
 use crate::errors::{BEErrors, BEResult};
 
-use super::Rows;
-const PAGE_SIZE: usize = 4096;
+use super::{Rows, PAGE_SIZE};
+
 const SLOT_COUNT: usize = 20;
 const SLOT_SIZE: usize = 32;
 
@@ -78,6 +78,10 @@ impl Page {
             self.page,
             std::mem::size_of::<u32>(),
         );
+    }
+
+    pub fn get_data(&self) -> *const u8 {
+        self.page
     }
 
     pub fn write(

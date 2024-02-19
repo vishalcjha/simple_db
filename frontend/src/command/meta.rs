@@ -12,6 +12,9 @@ pub enum MetaCommand {
 #[derive(Debug, Clone)]
 pub struct DbPath(pub PathBuf);
 
+#[derive(Debug, Clone)]
+pub struct PersistToDish;
+
 impl FromStr for MetaCommand {
     type Err = DbError;
 

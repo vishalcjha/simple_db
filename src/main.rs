@@ -6,21 +6,26 @@ use rustyline::{error::ReadlineError, DefaultEditor};
 mod cli;
 fn main() -> SError<()> {
     let cli = cli::Cli::parse();
-    backend::vm::initialize_db(frontend::DbPath(cli.db_path.clone()))
-        .expect("Failed to initialize db");
-
-    if !cli.db_path.exists() {
+    let db_exists = cli.db_path.exists();
+    if !db_exists {
         load_sample_data();
     }
 
-    let mut rl = DefaultEditor::new().expect("Failed to open realline editor");
+    backend::vm::initialize_db(frontend::DbPath(cli.db_path)).expect("Failed to initialize db");
+
+    // add code to save loaded data.
+    if !db_exists {
+        backend::vm::persist_to_db().expect("Failed to persist to disk");
+    }
+
+    let mut rl = DefaultEditor::new().expect("Failed to open readline editor");
     let _ = rl.load_history("history.txt");
     loop {
         let readline = rl.readline("db > ");
         match readline {
             Ok(line) => {
                 let _ = rl.add_history_entry(line.as_str());
-                exeture_command(&line);
+                execute_command(&line);
             }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");
@@ -41,7 +46,7 @@ fn main() -> SError<()> {
     Ok(())
 }
 
-fn exeture_command(prompt: &str) {
+fn execute_command(prompt: &str) {
     let command_result = Command::from_str(&prompt);
     let Ok(command) = command_result else {
         println!("{:?}", command_result.err().unwrap());
@@ -70,7 +75,7 @@ fn load_sample_data() {
         };
 
         match command {
-            Command::Meta(_) => panic!("only statment command are allowed in pre-load"),
+            Command::Meta(_) => panic!("only statement command are allowed in pre-load"),
             Command::Statement(statement) => {
                 backend::vm::execute(statement).expect("Failed to execute statement")
             }

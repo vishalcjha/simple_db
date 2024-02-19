@@ -83,6 +83,7 @@ dependencies = [
  "prettytable-rs",
  "rstest",
  "serde",
+ "serde_json",
  "thiserror",
 ]
 
