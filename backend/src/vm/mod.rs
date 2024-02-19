@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use frontend::command::statement::StatementCommand;
 use prettytable::{Cell, Row};
+use tracing::instrument;
 
 use crate::{errors::BEResult, DATABASE};
 pub trait Execution {
@@ -16,6 +17,7 @@ pub enum ExecutionResult {
     CreateResult(()),
 }
 
+#[instrument]
 pub fn execute(command: StatementCommand) -> BEResult<ExecutionResult> {
     match command {
         StatementCommand::Select(statement) => statement
@@ -40,14 +42,18 @@ pub fn persist_to_db() -> BEResult<()> {
 
 impl Execution for frontend::InsertStatement {
     type Output = ();
+    #[instrument]
     fn execute(self) -> BEResult<()> {
+        tracing::info!("");
         DATABASE.insert_record(self)
     }
 }
 
 impl Execution for frontend::SelectStatement {
     type Output = ();
+    #[instrument]
     fn execute(self) -> BEResult<()> {
+        tracing::info!("");
         use prettytable::Table;
         let mut table = Table::new();
         table.add_row(Row::new(
@@ -67,7 +73,9 @@ impl Execution for frontend::SelectStatement {
 
 impl Execution for frontend::TableDefinition {
     type Output = ();
+    #[instrument]
     fn execute(self) -> BEResult<()> {
+        tracing::info!("");
         println!("Table def");
         println!("{self}");
         DATABASE.add_table_definitions(self)?;

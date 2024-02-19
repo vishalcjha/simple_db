@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use nom::{branch::alt, bytes::complete::tag_no_case, IResult};
+use tracing::instrument;
 
 use crate::{definitions::table_definition::TableDefinition, errors::DbError};
 
@@ -51,7 +52,9 @@ fn parse_create_command(command: &str) -> IResult<&str, CommandType> {
     Ok(("", CommandType::Create))
 }
 
+#[instrument]
 fn parse_command_type(command: &str) -> IResult<&str, CommandType> {
+    tracing::info!("");
     let command = alt((
         parse_select_command,
         parse_insert_command,

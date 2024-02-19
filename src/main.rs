@@ -3,8 +3,17 @@ use std::{fs::read_to_string, str::FromStr};
 use clap::Parser;
 use frontend::{command::Command, errors::SError};
 use rustyline::{error::ReadlineError, DefaultEditor};
+use tracing::instrument;
 mod cli;
 fn main() -> SError<()> {
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+        .compact()
+        .with_file(true)
+        .with_line_number(true)
+        .with_target(false)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("failed to install tracing");
+
     let cli = cli::Cli::parse();
     let db_exists = cli.db_path.exists();
     if !db_exists {
@@ -21,6 +30,7 @@ fn main() -> SError<()> {
     let mut rl = DefaultEditor::new().expect("Failed to open readline editor");
     let _ = rl.load_history("history.txt");
     loop {
+        tracing::info!("reading lines");
         let readline = rl.readline("db > ");
         match readline {
             Ok(line) => {
@@ -46,6 +56,7 @@ fn main() -> SError<()> {
     Ok(())
 }
 
+#[instrument(name = "test")]
 fn execute_command(prompt: &str) {
     let command_result = Command::from_str(&prompt);
     let Ok(command) = command_result else {
@@ -68,7 +79,9 @@ fn execute_command(prompt: &str) {
     }
 }
 
+#[instrument]
 fn load_sample_data() {
+    tracing::info!("");
     for command in read_to_string("scripts/initial_load_student_table.sql")
         .unwrap()
         .lines()
