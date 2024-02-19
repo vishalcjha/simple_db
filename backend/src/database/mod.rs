@@ -12,7 +12,9 @@ use frontend::{
 };
 
 use crate::{
-    disk::{def_iterator::DiskTableDefinitionIterator, DiskAccessor},
+    disk::{
+        data_iterator::DiskDataIterator, def_iterator::DiskTableDefinitionIterator, DiskAccessor,
+    },
     errors::{BEErrors, BEResult},
     DATABASE,
 };
@@ -38,6 +40,13 @@ impl Database {
         let def_iterator = DiskTableDefinitionIterator::new(disk_accessor.as_ref().unwrap());
         for table_def in def_iterator.into_iter() {
             DATABASE.add_table_definitions(table_def)?;
+        }
+
+        let data_iter = DiskDataIterator::new(disk_accessor.as_ref().unwrap());
+        for (table_name, data) in data_iter.into_iter() {
+            let table = Table::new(data);
+            let mut tables = self.tables.lock().unwrap();
+            tables.insert(table_name, table);
         }
 
         Ok(())

@@ -38,8 +38,8 @@ impl Default for Page {
         };
         Self {
             page,
-            // free slot num + 20 slots space are available for table data.
-            free_offset: (SLOT_COUNT * SLOT_SIZE) + std::mem::size_of::<u32>(),
+            // (free slot num + free offset pos) + 20 slots space are available for table data.
+            free_offset: (SLOT_COUNT * SLOT_SIZE) + 2 * std::mem::size_of::<u32>(),
         }
     }
 }
@@ -53,6 +53,16 @@ impl Drop for Page {
 }
 
 impl Page {
+    pub(crate) fn new(initialized_data: Vec<u8>) -> Page {
+        let mut initialized_data = initialized_data;
+        let page = initialized_data.as_mut_ptr();
+        std::mem::forget(initialized_data);
+        let free_offset =
+            unsafe { *(page.add(std::mem::size_of::<u32>() as usize) as *const u32) } as usize;
+
+        Page { page, free_offset }
+    }
+
     fn get_alignment_padding<T>(offset: usize) -> usize {
         let required_alignment = std::mem::align_of::<T>();
         let misalignment = offset % required_alignment;
@@ -97,7 +107,7 @@ impl Page {
 
         unsafe {
             let ptr = self.page.add(
-                (1 * std::mem::size_of::<u32>()
+                (2 * std::mem::size_of::<u32>()
                     + available_slot_pos as usize * std::mem::size_of::<u32>())
                     as usize,
             );
@@ -162,6 +172,15 @@ impl Page {
             }
         }
 
+        let free_offset = self.free_offset as u32;
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                &free_offset as *const u32 as *const u8,
+                self.page.add(std::mem::size_of::<u32>() as usize),
+                std::mem::size_of::<u32>(),
+            )
+        };
+
         Ok(())
     }
 
@@ -175,7 +194,7 @@ impl Page {
             return Ok(None);
         }
         let mut rows = Vec::new();
-        let mut offset = std::mem::size_of::<u32>();
+        let mut offset = 2 * std::mem::size_of::<u32>();
         for _ in 0..written_slots_count {
             let data_offset = unsafe { *(self.page.add(offset) as *const u32) } as usize;
             let row = self.read(data_offset, columns, table_definition)?;

@@ -1,12 +1,22 @@
 use frontend::{command::statement::insert::Value, ColumnName, TableDefinition};
 
-use crate::errors::BEResult;
+use crate::{database::PAGE_SIZE, errors::BEResult};
 
 use super::page::Page;
 
 #[derive(Debug, Clone, Default)]
 pub(super) struct Table {
     pub pages: Vec<Page>,
+}
+
+impl Table {
+    pub(super) fn new(data: Vec<u8>) -> Table {
+        let pages = data
+            .chunks(PAGE_SIZE)
+            .map(|it| Page::new(it.to_vec()))
+            .collect();
+        Table { pages }
+    }
 }
 
 impl Table {

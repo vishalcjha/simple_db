@@ -55,7 +55,10 @@ fn execute_command(prompt: &str) {
 
     match command {
         Command::Meta(meta_command) => match meta_command {
-            _ => std::process::exit(0),
+            _ => {
+                backend::vm::persist_to_db().expect("failed to save to db");
+                std::process::exit(0);
+            }
         },
         Command::Statement(statement) => {
             if let Err(err) = backend::vm::execute(statement) {
