@@ -11,11 +11,15 @@ To make code execution, we are using [tokio tracing](https://tokio.rs/tokio/topi
 ### Sample interaction
 ![image](./assets/sample_execution.png)
 
-### what it can do so far
-1. Parse create, insert and select commands.
-2. All commands must be in lower case. It is done to simplify case sensitivity difference b/w meta data like table, column name vs actual data.
-3. All select and insert command must have columns in right order aka order in table creation.
-4. Table records are added to page. Current implementation uses simplified version of slop page mechanism. To simplify, slot offset are written in header. Also unlike recommended implementation, where data is written from back to front, it writes from front to back. This put constraint of fixed size slot in page (need to know where slot area end in advance.).
-5. Types supported are 
-    * Int - this is saved as i64.
-    * Text - this is saved as string.
+### project goals
+|goal                 |status                   |description
+|---------------------|-------------------------|------------------
+|parse                |:white_check_mark:       |parse create, select, insert commands
+|preload              |:white_check_mark:       |load db with student table with sample records.
+|persist              |:white_check_mark:       |on exit all changes are flushed to disk which is loaded when simple_db comes back.
+|support types        |:white_check_mark:       |int as `i64` and text as `String`
+|b tree               |:pencil:                 |save pages in b-tree structure.
+|advanced parsing     |:pencil:                 |allow out of order column names.
+|projection           |:pencil:                 |for `select` command allow projection.
+|primary key          |:pencil:                 |allow unique id by supporting primary key.
+|join                 |:pencil:                 |basic join on ids.

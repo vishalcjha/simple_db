@@ -1,11 +1,19 @@
 use std::{fs::read_to_string, str::FromStr};
 
 use clap::Parser;
+use colored::Colorize;
 use frontend::{command::Command, errors::SError};
 use rustyline::{error::ReadlineError, DefaultEditor};
 use tracing::instrument;
 mod cli;
+mod help;
 fn main() -> SError<()> {
+    println!(
+        "{} {} {}",
+        "type".bold().green(),
+        "help".yellow().bold().italic(),
+        " to get started".bold().green()
+    );
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
         .compact()
         .with_file(true)
@@ -58,6 +66,10 @@ fn main() -> SError<()> {
 
 #[instrument(name = "test")]
 fn execute_command(prompt: &str) {
+    if prompt == "help" {
+        help::print_help();
+        return;
+    }
     let command_result = Command::from_str(&prompt);
     let Ok(command) = command_result else {
         println!("{:?}", command_result.err().unwrap());
