@@ -12,8 +12,9 @@ use frontend::{
 };
 
 use crate::{
-    disk::DiskAccessor,
+    disk::{def_iterator::DiskTableDefinitionIterator, DiskAccessor},
     errors::{BEErrors, BEResult},
+    DATABASE,
 };
 
 use self::table::Table;
@@ -33,6 +34,12 @@ impl Database {
     pub(super) fn init_db_with_file(&self, base_path: PathBuf) -> BEResult<()> {
         let mut disk_accessor = self.disk_accessor.lock().unwrap();
         *disk_accessor = Some(DiskAccessor::new(base_path));
+
+        let def_iterator = DiskTableDefinitionIterator::new(disk_accessor.as_ref().unwrap());
+        for table_def in def_iterator.into_iter() {
+            DATABASE.add_table_definitions(table_def)?;
+        }
+
         Ok(())
     }
 
