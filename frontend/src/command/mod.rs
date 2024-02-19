@@ -4,7 +4,7 @@ use crate::errors::DbError;
 
 use self::{meta::MetaCommand, statement::StatementCommand};
 
-mod meta;
+pub mod meta;
 pub mod statement;
 
 #[derive(Debug, Clone)]

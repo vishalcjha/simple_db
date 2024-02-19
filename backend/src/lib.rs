@@ -2,6 +2,7 @@ use database::Database;
 use lazy_static::lazy_static;
 
 mod database;
+mod disk;
 mod errors;
 mod fixtures;
 pub mod vm;

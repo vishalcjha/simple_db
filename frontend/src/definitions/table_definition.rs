@@ -16,15 +16,16 @@ use nom::{
 };
 
 use prettytable::{row, Table};
+use serde::{Deserialize, Serialize};
 
 use crate::errors::DbError;
 
 use super::{column::Column, NomParsable};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct TableName(pub String);
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct TableDefinition {
     pub name: TableName,
     pub columns: Vec<Column>,

@@ -6,12 +6,13 @@ use nom::{
     character::complete::{alphanumeric1, space0, space1},
     sequence::tuple,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::errors::DbError;
 
 use super::NomParsable;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Column(pub String, pub ColumnType);
 
 impl NomParsable for Column {
@@ -30,7 +31,7 @@ impl Column {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum ColumnType {
     Int,
     Text,

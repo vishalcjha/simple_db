@@ -1,9 +1,18 @@
 use std::{fs::read_to_string, str::FromStr};
 
+use clap::Parser;
 use frontend::{command::Command, errors::SError};
 use rustyline::{error::ReadlineError, DefaultEditor};
+mod cli;
 fn main() -> SError<()> {
-    load_sample_data();
+    let cli = cli::Cli::parse();
+    backend::vm::initialize_db(frontend::DbPath(cli.db_path.clone()))
+        .expect("Failed to initialize db");
+
+    if !cli.db_path.exists() {
+        load_sample_data();
+    }
+
     let mut rl = DefaultEditor::new().expect("Failed to open realline editor");
     let _ = rl.load_history("history.txt");
     loop {

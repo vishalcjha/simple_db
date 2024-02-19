@@ -2,6 +2,7 @@ mod page;
 mod table;
 use std::{
     collections::HashMap,
+    path::PathBuf,
     sync::{Arc, Mutex},
 };
 
@@ -10,7 +11,10 @@ use frontend::{
     SelectStatement, TableDefinition,
 };
 
-use crate::errors::{BEErrors, BEResult};
+use crate::{
+    disk::DiskAccessor,
+    errors::{BEErrors, BEResult},
+};
 
 use self::table::Table;
 
@@ -21,9 +25,16 @@ pub type Rows = Vec<Vec<Value>>;
 pub(super) struct Database {
     table_definitions: Sharable<HashMap<TableName, &'static TableDefinition>>,
     tables: Sharable<HashMap<TableName, Table>>,
+    disk_accessor: Sharable<Option<DiskAccessor>>,
 }
 
 impl Database {
+    pub(super) fn init_db_with_file(&self, base_path: PathBuf) -> BEResult<()> {
+        let mut disk_accessor = self.disk_accessor.lock().unwrap();
+        *disk_accessor = Some(DiskAccessor::new(base_path));
+        Ok(())
+    }
+
     pub(super) fn add_table_definitions(&self, definition: TableDefinition) -> BEResult<()> {
         let mut definition_holder = self.table_definitions.lock().unwrap();
         if definition_holder.get(&definition.name).is_some() {

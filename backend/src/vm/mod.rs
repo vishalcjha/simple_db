@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, path::PathBuf};
 
 use frontend::command::statement::StatementCommand;
 use prettytable::{Cell, Row};
@@ -30,10 +30,22 @@ pub fn execute(command: StatementCommand) -> BEResult<ExecutionResult> {
     }
 }
 
+pub fn initialize_db(db_path: frontend::DbPath) -> BEResult<()> {
+    DATABASE.init_db_with_file(db_path.0)
+}
+
 impl Execution for frontend::InsertStatement {
     type Output = ();
     fn execute(self) -> BEResult<()> {
         DATABASE.insert_record(self)
+    }
+}
+
+impl Execution for frontend::DbPath {
+    type Output = ();
+
+    fn execute(self) -> BEResult<Self::Output> {
+        todo!()
     }
 }
 
